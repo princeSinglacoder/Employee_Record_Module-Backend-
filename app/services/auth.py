@@ -18,5 +18,5 @@ def decode_jwt(token: str):
         return payload
     except jwt.ExpiredSignatureError:
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError    :
         return None

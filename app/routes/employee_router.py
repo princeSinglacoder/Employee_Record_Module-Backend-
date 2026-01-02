@@ -1,23 +1,15 @@
-from fastapi import APIRouter, HTTPException
-from app.schemas.employee import Employee,EmployeeUpdate
+from fastapi import APIRouter, HTTPException,Depends    
+from app.schemas.employee import Employee,TempEmployee
 from app.services.employee_service import Employee_Service
 from app.database.database import Repository
 from app.schemas.user import UserCreate,TempUserCreate
 from app.database.user_repo import UserRepository
+from app.utils.jwt import get_current_user
 
 router = APIRouter(prefix="/employee")
 
 empService = Employee_Service()
 
-
-@router.post('/register')
-def register(tempUserCreate:TempUserCreate):
-    user = UserCreate(**tempUserCreate.dict())
-
-    if not UserRepository.add_user(user):
-        raise HTTPException(status_code=400,detail='User already exists')
-    
-    return {'message':'User add SuccessFully'}
 
 @router.get("/")   # get all data
 def get_all_employees():
@@ -27,9 +19,13 @@ def get_all_employees():
 def get_employee(emp_id:str):
     return empService.get(emp_id)
 
-@router.post("/")  # when admin hit a 'add' button then this router must be call
-def create_employee(employee: Employee):
-    return empService.create(employee.empId,employee)
+# @router.post("/")  # when admin hit a 'add' button then this router must be call
+# def create_employee(employee: Employee):
+#     return empService.create(employee.empId,employee)
+
+@router.post('/register')
+def create_employee(employee: TempEmployee,current_user = Depends(get_current_user)):
+
 
 @router.put("/{emp_id}") 
 def update_employee(emp_id:str,employeeUpdate: EmployeeUpdate):

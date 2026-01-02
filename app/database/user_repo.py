@@ -1,15 +1,15 @@
 from typing import Dict
-from app.schemas.user import UserCreate
+from app.schemas.user import UserLogIn
 
 # In this db we generally store the user information
 
 class UserRepository:
     __users = {}
 
-    __users['Prince349'] = UserCreate(userName='Prince349',password='singla123',role='admin')
+    __users['Prince349'] = UserLogIn(userName='Prince349',password='singla123',role='admin')
     
     @classmethod
-    def add_user(cls,user:UserCreate):
+    def add_user(cls,user:UserLogIn):
         if user.userName in cls.__users:
             return False
         cls.__users[user.userName]=user
@@ -17,4 +17,4 @@ class UserRepository:
     
     @classmethod
     def get_user(cls,username:str):
-        return cls.__users[username]
+        return cls.__users.get(username)
