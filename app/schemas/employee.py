@@ -10,5 +10,5 @@ class TempEmployee(BaseModel):
 
 class Employee(TempEmployee): 
     #empUserName,empPassword
-    empUserName: str
-    empPassword: int = 123456
+    userName: str
+    password: str

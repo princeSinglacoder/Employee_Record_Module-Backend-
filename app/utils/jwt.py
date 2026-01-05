@@ -30,7 +30,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return {
             "userName": username,
             "role": role
-        }
+        }   
 
     except JWTError:
         raise HTTPException(

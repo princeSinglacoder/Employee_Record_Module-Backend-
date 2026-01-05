@@ -4,9 +4,11 @@ from typing import Literal, Annotated
     
 # login ke time data
 
-class TempUserLogIn(BaseModel):
+class UserLogIn(BaseModel):
     userName: str
     password: str
     
-class UserLogIn(TempUserLogIn):
+
+# This is hidden
+class EmployeeUserLogIn(UserLogIn):
     role: str  = 'employee'

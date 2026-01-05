@@ -1,4 +1,4 @@
-from app.schemas.employee import Employee,EmployeeUpdate
+from app.schemas.employee import Employee
 from app.schemas.department import Department,DepartmentUpdate
 
 class Repository:
@@ -10,7 +10,7 @@ class Repository:
     @classmethod
     def setInEmployee(cls,key:str,value:Employee):
         cls.__employee[key]=value
-        return  {'message': "Employee Add successfully"}
+        return {'message': "Employee added successfully"}
 
     @classmethod
     def getEmployeeIndividual(cls,key:str):
