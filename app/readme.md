@@ -21,4 +21,4 @@ Backend system to manage employees and departments where Admin can register empl
 - Python
 - FastAPI
 - In-memory storage (dictionary)
-- JWT authentication (if implemented)
+- JWT authentication (continue)
