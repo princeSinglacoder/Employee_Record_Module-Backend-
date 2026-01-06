@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException,Depends,status
 from app.schemas.employee import Employee,TempEmployee
 from app.services.employee_service import Employee_Service
 from app.database.database import Repository
-from app.schemas.user import UserLogIn,EmployeeUserLogIn
+from app.schemas.user import EmployeeUserLogIn
 from app.database.user_repo import UserRepository
 from app.utils.jwt import get_current_user
 import uuid
@@ -56,7 +56,7 @@ def register_employee(tempEmployee:TempEmployee,current_user = Depends(get_curre
 
 
 @router.put("/{userName}") 
-def update_employee(userName:str,employeeUpdate: Employee,current_user = Depends(get_current_user)):
+def update_employee(userName:str,employeeUpdate: TempEmployee,current_user = Depends(get_current_user)):
     if current_user['role']!='admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only admin allowed')
     

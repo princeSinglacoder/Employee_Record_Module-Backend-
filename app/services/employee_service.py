@@ -1,5 +1,5 @@
 from app.database.database import Repository
-from app.schemas.employee import Employee
+from app.schemas.employee import Employee,TempEmployee
 from fastapi import HTTPException
 
 class Employee_Service:
@@ -16,7 +16,7 @@ class Employee_Service:
         
         return Repository.getEmployeeIndividual(userName)
     
-    def update(self,userName:str,employeeUpdate: Employee):
+    def update(self,userName:str,employeeUpdate: TempEmployee):
         # first fetch actual data
         if userName not in Repository.getEmployee():
             raise HTTPException(status_code=404, detail='UserName not found')
