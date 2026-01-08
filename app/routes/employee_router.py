@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException,Depends,status   
-from app.schemas.employee import Employee,TempEmployee
+from fastapi import APIRouter, HTTPException,Depends,status,    Request 
+from app.schemas.employee import Employee,TempEmployee, UpdateEmployee
 from app.services.employee_service import Employee_Service
-from app.database.database import Repository
+from app.database.employeeDB import Repository
 from app.schemas.user import EmployeeUserLogIn
 from app.database.user_repo import UserRepository
 from app.utils.jwt import get_current_user
@@ -13,19 +13,26 @@ empService = Employee_Service()
 
 
 @router.get("/")   # get all data
-def get_all_employees(current_user = Depends(get_current_user)):
-
+def get_all_employees(request: Request):
+    current_user = get_current_user(request)
+    if current_user['role']!= 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only admin can access all employees')
     # no need to check the role
     return Repository.getEmployee()
 
 @router.get("/{userName}")  # get particular data
-def get_employee(userName:str,current_user=Depends(get_current_user)):
-    return empService.get(userName)
+def get_employee(userName:str,request: Request):
+    current_user = get_current_user(request)
+    if current_user['role']=='admin' or current_user['userName']==userName:
+        return empService.get(userName)
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can access only your data')
 
 
 @router.post('/register')
-def register_employee(tempEmployee:TempEmployee,current_user = Depends(get_current_user)):
-    # role check
+def register_employee(tempEmployee:TempEmployee, request: Request):
+    current_user = get_current_user(request)
+
+    # role check    
     if current_user['role']!='admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Only admin can register employee")
     
@@ -39,8 +46,6 @@ def register_employee(tempEmployee:TempEmployee,current_user = Depends(get_curre
 
     # Now save that employee in first DB
     empService.create(username,employee)
-    # Repository.setInEmployee(employee.userName,employee)
-
 
     # We save in Second DB where we set every user as an employee
     UserRepository.add_user(
@@ -56,14 +61,16 @@ def register_employee(tempEmployee:TempEmployee,current_user = Depends(get_curre
 
 
 @router.put("/{userName}") 
-def update_employee(userName:str,employeeUpdate: TempEmployee,current_user = Depends(get_current_user)):
+def update_employee(userName:str,employeeUpdate: UpdateEmployee, request: Request):
+    current_user = get_current_user(request)
     if current_user['role']!='admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only admin allowed')
     
     return empService.update(userName,employeeUpdate)
 
 @router.delete("/{userName}")
-def delete_employee(userName:str,current_user = Depends(get_current_user)):
+def delete_employee(userName:str,request: Request):
+    current_user = get_current_user(request)
     if current_user['role']!='admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only admin allowed')
     

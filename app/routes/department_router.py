@@ -1,7 +1,7 @@
 from fastapi import APIRouter,HTTPException
 from app.schemas.department import Department,DepartmentUpdate
 from app.services.department_service import Department_Service
-from app.database.database import Repository
+from app.database.employeeDB import Repository
 
 router = APIRouter(prefix='/department')
 

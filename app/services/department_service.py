@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.schemas.department import Department,DepartmentUpdate
-from app.database.database import Repository
+from app.database.employeeDB import Repository
 
 class Department_Service:
     def create(self,departId:str,department:Department):

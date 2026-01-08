@@ -4,9 +4,12 @@ from app.routes.department_router import router as department_router
 from app.routes.auth import router as auth_router
 from app.routes.leave_router import router as leave_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.database.database import engine,Base
+from app.models.employee import Employee
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
     
 app.include_router(employee_router)
 app.include_router(department_router)

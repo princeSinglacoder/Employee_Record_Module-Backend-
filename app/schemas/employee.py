@@ -8,6 +8,12 @@ class TempEmployee(BaseModel):
     empSalary: Annotated[float,Field(..., gt=0, description='Salary of the Employee')]
     departId: Annotated[str,Field(..., description='DepartId of the Employee')]
 
+class UpdateEmployee(BaseModel):
+    empName: Annotated[Optional[str], Field(default=None, description='Name of the Employee')]
+    empAge: Annotated[Optional[int], Field(default=None, gt=0,lt=120, description='Age of the Employee')]
+    empSalary: Annotated[Optional[float], Field(default=None, gt=0, description='Salary of the Employee')]
+    departId: Annotated[Optional[str], Field(default=None, description='DepartId of the Employee')]
+
 class Employee(TempEmployee): 
     #empUserName,empPassword
     userName: str

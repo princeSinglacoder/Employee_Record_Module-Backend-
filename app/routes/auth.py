@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+from app.schemas.user import LogIn
 from app.database.user_repo import UserRepository
 from app.utils.jwt import create_access_token
 
@@ -7,10 +7,10 @@ router =  APIRouter(prefix='/auth')
 
 
 @router.post('/login')
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Swagger UI and OAuth2 clients send credentials as form data
-    username = form_data.username
-    password = form_data.password
+def login(login_data: LogIn):
+
+    username = login_data.userName
+    password = login_data.password
 
     db_user = UserRepository.get_user(username)
 
@@ -21,7 +21,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail='Password not match')
 
     token = create_access_token({
-        'sub': db_user.userName,
+        'userName': db_user.userName,
         'role': db_user.role
     })
 
