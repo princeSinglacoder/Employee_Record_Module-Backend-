@@ -3,6 +3,11 @@ from app.schemas.employee import Employee,TempEmployee,UpdateEmployee
 from fastapi import HTTPException
 
 class Employee_Service:
+    def checkExist(self,userName:str):
+        if userName in Repository.getEmployee():
+            return True
+        return False
+    
     def create(self,userName:str,employee: Employee):
         
         if employee.departId not in Repository.getDepartment():

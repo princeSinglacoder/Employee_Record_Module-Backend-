@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException,Depends,status,    Request 
+from fastapi import APIRouter, HTTPException,status,    Request 
 from app.schemas.employee import Employee,TempEmployee, UpdateEmployee
 from app.services.employee_service import Employee_Service
 from app.database.employeeDB import Repository
@@ -39,6 +39,9 @@ def register_employee(tempEmployee:TempEmployee, request: Request):
     # Generate Credentials
     username = f"EMP-{uuid.uuid4().hex[:6]}"
     password = "123456"
+
+    if empService.checkExist(username):
+        raise HTTPException(status_code=400,detail="Username already exists, try again")
 
     # Create employee object
     employee = Employee(**tempEmployee.dict(),userName=username,password=password)

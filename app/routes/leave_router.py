@@ -16,6 +16,14 @@ def get_all_leaves(request: Request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admin can access all leaves")
     return LeaveDB.get_all_leaves()
 
+@router.get("/my")
+def get_my_leaves(request: Request):
+    current_user = get_current_user(request)
+    all_leaves = LeaveDB.get_all_leaves()
+    # Filter leaves for current user
+    my_leaves = {leave_id: leave for leave_id, leave in all_leaves.items() if leave.userName == current_user["userName"]}
+    return my_leaves
+
 @router.get("/{leave_id}")
 def get_leave(leave_id: str, request: Request):
     current_user = get_current_user(request)

@@ -14,13 +14,20 @@ def create_access_token(data:dict):
 
 
 def get_current_user(request:Request):
-    auth_header = request.headers.get('Authorization')   # header se token nikala
-    if not auth_header:
+    # Try to get token from cookie first
+    token = request.cookies.get('access_token')
+    
+    # Fallback: Try to get from Authorization header
+    if not token:
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+    
+    if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
-    
-    scheme, token = auth_header.split(" ")
-    if scheme != "Bearer":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid authentication scheme")
-    
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return payload
