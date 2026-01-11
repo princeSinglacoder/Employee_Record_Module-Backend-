@@ -32,7 +32,8 @@ def login(login_data: LogIn, response: Response):
     return {
         "message": "Login successfully",
         "userName": user.userName,
-        "role": user.role
+        "role": user.role,
+        "token": token  # Also return token for frontend to store
     }
 
 @router.post("/logout")
