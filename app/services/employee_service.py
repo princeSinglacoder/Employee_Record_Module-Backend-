@@ -1,42 +1,44 @@
 from app.database.employeeDB import Repository
-from app.schemas.employee import Employee,TempEmployee,UpdateEmployee
-from fastapi import HTTPException
+from app.schemas.employee import Employee, TempEmployee, UpdateEmployee
+from fastapi import HTTPException, Depends
+from sqlalchemy.orm import Session
+from app.config import get_db
 
 class Employee_Service:
-    def checkExist(self,userName:str):
-        if userName in Repository.getEmployee():
-            return True
-        return False
-    
-    def create(self,userName:str,employee: Employee):
-        
-        if employee.departId not in Repository.getDepartment():
-            raise HTTPException(status_code=404, detail='Department not exist')
-        
-        return Repository.setInEmployee(userName,employee)
+    def __init__(self, db: Session = Depends(get_db)):
+        self.repo = Repository(db)
 
-    def get(self,userName:str):
-        if userName not in Repository.getEmployee():
-            raise HTTPException(status_code=404, detail='Employee doesnt exist')
-        
-        return Repository.getEmployeeIndividual(userName)
-    
-    def update(self,userName:str,employeeUpdate: UpdateEmployee):
-        # first fetch actual data
-        if userName not in Repository.getEmployee():
-            raise HTTPException(status_code=404, detail='UserName not found')
-        
-        existEmp = Repository.getEmployeeIndividual(userName)
+    def checkExist(self, userName: str) -> bool:
+        employee = self.repo.getEmployeeIndividual(userName)
+        return employee is not None
 
-        update_data =  employeeUpdate.model_dump(exclude_none=True)
+    def create(self, employee: Employee):
+        # Check if department exists
+        department = self.repo.getDepartmentIndividual(employee.departId)
+        if not department:
+            raise HTTPException(status_code=404, detail='Department does not exist')
 
-        for key,value in update_data.items():
-            setattr(existEmp,key,value)
+        return self.repo.setInEmployee(employee)
 
-        return Repository.updateInEmployee(userName,existEmp)
+    def get(self, userName: str):
+        employee = self.repo.getEmployeeIndividual(userName)
+        if not employee:
+            raise HTTPException(status_code=404, detail='Employee does not exist')
 
-    def delete(self,userName:str):
-        if userName not in Repository.getEmployee():
-            raise HTTPException(status_code=404, detail='Employee Not Found')
-        
-        return  Repository.deleteInEmployee(userName)
+        return employee
+
+    def get_all(self):
+        return self.repo.getEmployee()
+
+    def update(self, userName: str, employeeUpdate: UpdateEmployee):
+        # Check if employee exists
+        if not self.checkExist(userName):
+            raise HTTPException(status_code=404, detail='Employee not found')
+
+        return self.repo.updateInEmployee(userName, employeeUpdate)
+
+    def delete(self, userName: str):
+        if not self.checkExist(userName):
+            raise HTTPException(status_code=404, detail='Employee not found')
+
+        return self.repo.deleteInEmployee(userName)

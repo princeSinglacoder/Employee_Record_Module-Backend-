@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException, Response, Request, status
+from fastapi import APIRouter, HTTPException, Response, Request, status, Depends
 from app.schemas.user import LogIn
 from app.database.user_repo import UserRepository
 from app.utils.jwt import create_access_token, get_current_user
+from sqlalchemy.orm import Session
+from app.config import get_db
 
 router = APIRouter(prefix="/auth")
 
 @router.post("/login")
-def login(login_data: LogIn, response: Response):
-    user = UserRepository.get_user(login_data.userName)
+def login(login_data: LogIn, response: Response, db: Session = Depends(get_db)):
+    user_repo = UserRepository(db)
+    user = user_repo.get_user(login_data.userName)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

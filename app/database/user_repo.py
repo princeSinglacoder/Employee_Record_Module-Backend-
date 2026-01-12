@@ -1,20 +1,48 @@
-from typing import Dict
+from sqlalchemy.orm import Session
+from app.models.user import User as UserModel
 from app.schemas.user import EmployeeUserLogIn
-
-# In this db we generally store the user information
+from typing import Optional
 
 class UserRepository:
-    __users = {}
+    def __init__(self, db: Session):
+        self.db = db
 
-    __users['Prince349'] = EmployeeUserLogIn(userName='Prince349', password='singla123', role='admin')
-    
-    @classmethod
-    def add_user(cls,user:EmployeeUserLogIn):
-        if user.userName in cls.__users:
+    def add_user(self, user: EmployeeUserLogIn) -> bool:
+        # Check if user already exists
+        existing = self.db.query(UserModel).filter(UserModel.userName == user.userName).first()
+        if existing:
             return False
-        cls.__users[user.userName]=user
+
+        db_user = UserModel(
+            userName=user.userName,
+            password=user.password,
+            role=user.role
+        )
+        self.db.add(db_user)
+        self.db.commit()
+        self.db.refresh(db_user)
         return True
-    
-    @classmethod
-    def get_user(cls,username:str):
-        return cls.__users.get(username)
+
+    def get_user(self, username: str) -> Optional[UserModel]:
+        return self.db.query(UserModel).filter(UserModel.userName == username).first()
+
+    def get_all_users(self):
+        return self.db.query(UserModel).all()
+
+    def update_user_role(self, username: str, new_role: str) -> dict:
+        db_user = self.db.query(UserModel).filter(UserModel.userName == username).first()
+        if not db_user:
+            return {'error': 'User not found'}
+
+        db_user.role = new_role
+        self.db.commit()
+        return {'message': 'User role updated successfully'}
+
+    def delete_user(self, username: str) -> dict:
+        db_user = self.db.query(UserModel).filter(UserModel.userName == username).first()
+        if not db_user:
+            return {'error': 'User not found'}
+
+        self.db.delete(db_user)
+        self.db.commit()
+        return {'message': 'User deleted successfully'}

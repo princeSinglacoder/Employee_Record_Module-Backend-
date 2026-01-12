@@ -1,38 +1,40 @@
-from fastapi import HTTPException
-from app.schemas.department import Department,DepartmentUpdate
+from fastapi import HTTPException, Depends
+from app.schemas.department import Department, DepartmentUpdate
 from app.database.employeeDB import Repository
+from sqlalchemy.orm import Session
+from app.config import get_db
 
 class Department_Service:
-    def create(self,departId:str,department:Department):
-        if departId in Repository.getDepartment():
-            raise HTTPException(status_code=400, detail='Department already exist')
+    def __init__(self, db: Session = Depends(get_db)):
+        self.repo = Repository(db)
 
-        return Repository.setInDepart(departId,department)
-    
-    def get(self,departId:str):
-        if departId not in Repository.getDepartment():
-            raise HTTPException(status_code=404, detail='Department doesnt exist')
-        
-        return Repository.getDepartmentIndividual(departId)
-    
-    def update(self,departId:str,departmentUpdate: DepartmentUpdate):
-        # first fetch actual data
-        if departId not in Repository.getDepartment():
-            raise HTTPException(status_code=404, detail='departId not found')
-        
-        existDepart = Repository.getDepartmentIndividual(departId)
+    def create(self, department: Department):
+        # Check if department exists
+        existing = self.repo.getDepartmentIndividual(department.departId)
+        if existing:
+            raise HTTPException(status_code=400, detail='Department already exists')
 
-        update_data =  departmentUpdate.model_dump(exclude_none=True)
+        return self.repo.setInDepart(department)
 
-        for key,value in update_data.items():
-            setattr(existDepart,key,value)
+    def get(self, departId: str):
+        department = self.repo.getDepartmentIndividual(departId)
+        if not department:
+            raise HTTPException(status_code=404, detail='Department does not exist')
 
-        return Repository.updateInDepartment(departId,existDepart)
-    
+        return department
 
-    def delete(self,departId:str):
-        if departId not in Repository.getDepartment():
-            raise HTTPException(status_code=404, detail='Department Not Found')
-    
-        
-        return  Repository.deleteInDepartment(departId)
+    def get_all(self):
+        return self.repo.getDepartment()
+
+    def update(self, departId: str, departmentUpdate: DepartmentUpdate):
+        # Check if department exists
+        if not self.repo.getDepartmentIndividual(departId):
+            raise HTTPException(status_code=404, detail='Department not found')
+
+        return self.repo.updateInDepartment(departId, departmentUpdate)
+
+    def delete(self, departId: str):
+        if not self.repo.getDepartmentIndividual(departId):
+            raise HTTPException(status_code=404, detail='Department not found')
+
+        return self.repo.deleteInDepartment(departId)
