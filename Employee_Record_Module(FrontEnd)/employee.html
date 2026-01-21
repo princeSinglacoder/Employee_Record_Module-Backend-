@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Dashboard - Employee Record System</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,7 +15,7 @@
                 <div class="notification-container">
                     <button class="notification-btn" onclick="toggleNotificationDropdown()">
                         <span class="notification-icon">🔔</span>
-                        <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                        <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
                     </button>
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="notification-header">
@@ -40,39 +41,20 @@
         </div>
 
         <div class="main-content">
-            <!-- Profile Section -->
             <div id="profile-section" class="section active">
                 <div class="section-header">
                     <h2>My Profile</h2>
                     <button class="btn btn-primary" onclick="loadProfile()">Refresh</button>
                 </div>
                 <div class="profile-card">
-                    <div id="profileInfo">
-                        <div class="info-row">
-                            <strong>Username:</strong>
-                            <span id="profileUsername">-</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Name:</strong>
-                            <span id="profileName">-</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Age:</strong>
-                            <span id="profileAge">-</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Salary:</strong>
-                            <span id="profileSalary">-</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Department ID:</strong>
-                            <span id="profileDepartId">-</span>
-                        </div>
-                    </div>
+                    <div class="info-row"><strong>Username:</strong> <span id="profileUsername">-</span></div>
+                    <div class="info-row"><strong>Name:</strong> <span id="profileName">-</span></div>
+                    <div class="info-row"><strong>Age:</strong> <span id="profileAge">-</span></div>
+                    <div class="info-row"><strong>Salary:</strong> <span id="profileSalary">-</span></div>
+                    <div class="info-row"><strong>Department ID:</strong> <span id="profileDepartId">-</span></div>
                 </div>
             </div>
 
-            <!-- My Leaves Section -->
             <div id="leaves-section" class="section">
                 <div class="section-header">
                     <h2>My Leave Requests</h2>
@@ -84,8 +66,8 @@
                             <tr>
                                 <th>Leave ID</th>
                                 <th>Type</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
+                                <th>Start</th>
+                                <th>End</th>
                                 <th>Reason</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -98,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- Apply Leave Section -->
             <div id="applyLeave-section" class="section">
                 <div class="section-header">
                     <h2>Apply for Leave</h2>
@@ -109,9 +90,9 @@
                             <label for="leaveType">Leave Type *</label>
                             <select id="leaveType" name="Leave_type" required>
                                 <option value="">Select leave type</option>
-                                <option value="sick">Sick Leave</option>
-                                <option value="casual">Casual Leave</option>
-                                <option value="earned">Earned Leave</option>
+                                <option value="sick">Sick</option>
+                                <option value="casual">Casual</option>
+                                <option value="earned">Earned</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -123,8 +104,8 @@
                             <input type="date" id="endDate" name="end_date" required>
                         </div>
                         <div class="form-group">
-                            <label for="leaveReason">Reason * (10-300 characters)</label>
-                            <textarea id="leaveReason" name="reason" rows="4" minlength="10" maxlength="300" required placeholder="Enter reason for leave"></textarea>
+                            <label for="leaveReason">Reason * (10-300 chars)</label>
+                            <textarea id="leaveReason" name="reason" rows="4" minlength="10" maxlength="300" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Apply Leave</button>
                     </form>
@@ -134,7 +115,6 @@
         </div>
     </div>
 
-    <!-- Edit Leave Modal -->
     <div id="editLeaveModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditLeaveModal()">&times;</span>
@@ -145,9 +125,9 @@
                     <label for="editLeaveType">Leave Type</label>
                     <select id="editLeaveType" name="Leave_type">
                         <option value="">Select leave type</option>
-                        <option value="sick">Sick Leave</option>
-                        <option value="casual">Casual Leave</option>
-                        <option value="earned">Earned Leave</option>
+                        <option value="sick">Sick</option>
+                        <option value="casual">Casual</option>
+                        <option value="earned">Earned</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -159,11 +139,17 @@
                     <input type="date" id="editEndDate" name="end_date">
                 </div>
                 <div class="form-group">
-                    <label for="editLeaveReason">Reason (10-300 characters)</label>
+                    <label for="editLeaveReason">Reason</label>
                     <textarea id="editLeaveReason" name="reason" rows="4" minlength="10" maxlength="300"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Update Leave</button>
             </form>
+        </div>
+    </div>
+
+    <div id="leaveDetailModal" class="modal">
+        <div class="modal-content">
+            <!-- Modal content will be populated by JavaScript -->
         </div>
     </div>
 
@@ -175,3 +161,4 @@
     <script src="js/employee.js"></script>
 </body>
 </html>
+

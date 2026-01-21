@@ -12,6 +12,7 @@ class Employee(Base):
     empAge = Column(Integer, nullable=False)
     empSalary = Column(Float, nullable=False)
     departId = Column(String, nullable=False)
+    empGender = Column(String, nullable=True)
 
     # Login Credentials
     userName = Column(String, unique=True, nullable=False)

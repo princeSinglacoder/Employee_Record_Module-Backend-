@@ -364,11 +364,35 @@ async function deleteDepartment(departId) {
     }
 }
 
+// Simple modal helpers (admin.html uses these)
+function showEmployeeModal() {
+    const modal = document.getElementById('employeeModal');
+    if (modal) modal.style.display = 'block';
+}
+
+function showDepartmentModal() {
+    const modal = document.getElementById('departmentModal');
+    if (modal) modal.style.display = 'block';
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
+}
+
 // Close modals when clicking outside
 window.onclick = function(event) {
+    const employeeModal = document.getElementById('employeeModal');
+    const departmentModal = document.getElementById('departmentModal');
     const editEmployeeModal = document.getElementById('editEmployeeModal');
     const editDepartmentModal = document.getElementById('editDepartmentModal');
     
+    if (event.target === employeeModal) {
+        employeeModal.style.display = 'none';
+    }
+    if (event.target === departmentModal) {
+        departmentModal.style.display = 'none';
+    }
     if (event.target === editEmployeeModal) {
         editEmployeeModal.style.display = 'none';
     }

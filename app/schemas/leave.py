@@ -14,6 +14,7 @@ class UpdateEmployeeLeave(BaseModel):
     start_date: Annotated[Optional[str], Field(default=None)]
     end_date: Annotated[Optional[str], Field(default=None)]
     reason: Annotated[Optional[str], Field(default=None)]
+    status: Annotated[Optional[Literal['pending', 'approved', 'rejected']], Field(default=None)]
 
 # Admin / internal object
 class Leave(EmployeeLeaveRequest):

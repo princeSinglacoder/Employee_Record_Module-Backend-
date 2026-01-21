@@ -8,8 +8,13 @@ import alembic.command
 
 def run_migrations():
     """Run database migrations"""
-    alembic_cfg = alembic.config.Config("alembic.ini")
-    alembic.command.upgrade(alembic_cfg, "head")
+    try:
+        alembic_cfg = alembic.config.Config("alembic.ini")
+        alembic.command.upgrade(alembic_cfg, "head")
+        print("Migrations completed successfully!")
+    except Exception as e:
+        print(f"Error running migrations: {e}")
+        raise
 
 def create_tables():
     """Create all database tables (fallback if not using migrations)"""
@@ -18,6 +23,14 @@ def create_tables():
 def init_database():
     """Initialize database with default data"""
     from app.config import SessionLocal
+
+    # First create all tables directly
+    print("Creating database tables...")
+    try:
+        create_tables()
+        print("Tables created successfully!")
+    except Exception as e:
+        print(f"Error creating tables: {e}")
 
     db = SessionLocal()
     try:
@@ -32,6 +45,7 @@ def init_database():
             )
             db.add(admin)
             db.commit()
+            print("Default admin user created!")
 
         print("Database initialized successfully!")
     except Exception as e:
