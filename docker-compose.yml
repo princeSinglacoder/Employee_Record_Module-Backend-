@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Admin
+      POSTGRES_DB: Employee
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # Use host.docker.internal to connect to the host's Postgres from inside the container
+      DATABASE_URL: postgresql://postgres:Admin@host.docker.internal:5432/Employee
+      PORT: 8000
+    volumes:
+      - .:/app
+    command: ["python", "/app/docker_start.py"]
+
+volumes:
+  postgres_data:
