@@ -7,6 +7,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // ------------------ WebSocket for notifications ------------------
+    const employee_id = currentUserInfo.id; // or currentUserInfo.employee_id
+    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${employee_id}`);
+
+    socket.onopen = () => {
+        console.log("WebSocket connected for notifications");
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        alert(`Notification: ${data.message}`); // later you can replace with toast
+    };
+
+    socket.onclose = () => console.log("WebSocket disconnected");
+    socket.onerror = (err) => console.error("WebSocket error:", err);
+    // ------------------------------------------------------------------
+
     // Load initial data
     loadEmployees();
     loadAllLeaves();
@@ -16,24 +33,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupFormHandlers();
 });
 
+
 // Section navigation
 function showSection(sectionName) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
-    
+
     // Remove active class from all sidebar buttons
     document.querySelectorAll('.sidebar-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Show selected section
     const section = document.getElementById(`${sectionName}-section`);
     if (section) {
         section.classList.add('active');
     }
-    
+
     // Add active class to clicked button
     event.target.classList.add('active');
 }
@@ -43,12 +61,12 @@ async function loadEmployees() {
     try {
         const employeesData = await api.getAllEmployees();
         const tbody = document.getElementById('employeesTableBody');
-        
+
         // Convert dictionary to array if needed
-        const employees = Array.isArray(employeesData) 
-            ? employeesData 
+        const employees = Array.isArray(employeesData)
+            ? employeesData
             : Object.values(employeesData || {});
-        
+
         if (!employees || employees.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="no-data">No employees found</td></tr>';
             return;
@@ -68,7 +86,7 @@ async function loadEmployees() {
             </tr>
         `).join('');
     } catch (error) {
-        document.getElementById('employeesTableBody').innerHTML = 
+        document.getElementById('employeesTableBody').innerHTML =
             `<tr><td colspan="6" class="error">Error: ${error.message}</td></tr>`;
     }
 }
@@ -80,7 +98,7 @@ function setupFormHandlers() {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('registerResult');
-            
+
             const employeeData = {
                 empName: document.getElementById('empName').value,
                 empAge: parseInt(document.getElementById('empAge').value),
@@ -114,7 +132,7 @@ function setupFormHandlers() {
             e.preventDefault();
             const username = document.getElementById('editEmployeeUsername').value;
             const updateData = {};
-            
+
             const empName = document.getElementById('editEmpName').value;
             const empAge = document.getElementById('editEmpAge').value;
             const empSalary = document.getElementById('editEmpSalary').value;
@@ -142,7 +160,7 @@ function setupFormHandlers() {
         createDeptForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('createDepartmentResult');
-            
+
             const departmentData = {
                 departId: document.getElementById('departId').value,
                 departName: document.getElementById('departName').value
@@ -168,7 +186,7 @@ function setupFormHandlers() {
             e.preventDefault();
             const departId = document.getElementById('editDepartmentId').value;
             const updateData = {};
-            
+
             const departName = document.getElementById('editDepartName').value;
             if (departName) updateData.departName = departName;
 
@@ -224,12 +242,12 @@ async function loadAllLeaves() {
     try {
         const leavesData = await api.getAllLeaves();
         const tbody = document.getElementById('leavesTableBody');
-        
+
         // Convert dictionary to array if needed
-        const leaves = Array.isArray(leavesData) 
-            ? leavesData 
+        const leaves = Array.isArray(leavesData)
+            ? leavesData
             : Object.values(leavesData || {});
-        
+
         if (!leaves || leaves.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="no-data">No leave requests found</td></tr>';
             return;
@@ -253,7 +271,7 @@ async function loadAllLeaves() {
             </tr>
         `).join('');
     } catch (error) {
-        document.getElementById('leavesTableBody').innerHTML = 
+        document.getElementById('leavesTableBody').innerHTML =
             `<tr><td colspan="8" class="error">Error: ${error.message}</td></tr>`;
     }
 }
@@ -305,12 +323,12 @@ async function loadDepartments() {
     try {
         const departmentsData = await api.getAllDepartments();
         const tbody = document.getElementById('departmentsTableBody');
-        
+
         // Convert dictionary to array if needed
-        const departments = Array.isArray(departmentsData) 
-            ? departmentsData 
+        const departments = Array.isArray(departmentsData)
+            ? departmentsData
             : Object.values(departmentsData || {});
-        
+
         if (!departments || departments.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" class="no-data">No departments found</td></tr>';
             return;
@@ -327,7 +345,7 @@ async function loadDepartments() {
             </tr>
         `).join('');
     } catch (error) {
-        document.getElementById('departmentsTableBody').innerHTML = 
+        document.getElementById('departmentsTableBody').innerHTML =
             `<tr><td colspan="3" class="error">Error: ${error.message}</td></tr>`;
     }
 }
@@ -381,12 +399,12 @@ function closeModal(modalId) {
 }
 
 // Close modals when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
     const employeeModal = document.getElementById('employeeModal');
     const departmentModal = document.getElementById('departmentModal');
     const editEmployeeModal = document.getElementById('editEmployeeModal');
     const editDepartmentModal = document.getElementById('editDepartmentModal');
-    
+
     if (event.target === employeeModal) {
         employeeModal.style.display = 'none';
     }

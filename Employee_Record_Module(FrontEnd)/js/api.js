@@ -4,7 +4,7 @@ class APIService {
         this.baseURL = baseURL;
     }
 
-    async request(endpoint, options = {}) {
+    async request(endpoint, options = {}, retries = 1) {
         const url = `${this.baseURL}${endpoint}`;
         const defaultOptions = {
             credentials: 'include', // Important for cookies
@@ -23,7 +23,7 @@ class APIService {
 
         try {
             const response = await fetch(url, config);
-            
+
             // Handle non-JSON responses
             let data;
             const contentType = response.headers.get('content-type');
@@ -31,18 +31,28 @@ class APIService {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                data = text ? { message: text } : { message: 'No response from server' };
+                // If 204 No Content, text is empty
+                data = text ? { message: text } : {};
             }
 
             if (!response.ok) {
-                throw new Error(data.detail || data.message || `Error: ${response.status} ${response.statusText}`);
+                // Determine error message
+                const msg = data.detail || data.message || `Error: ${response.status} ${response.statusText}`;
+                throw new Error(msg);
             }
 
             return data;
         } catch (error) {
+            // Retry logic for network errors
+            if ((error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) && retries > 0) {
+                console.warn(`Request to ${url} failed, retrying... (${retries} attempts left)`);
+                await new Promise(res => setTimeout(res, 500)); // Wait 500ms
+                return this.request(endpoint, options, retries - 1);
+            }
+
             // Better error handling for network issues
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                throw new Error('Cannot connect to server. Make sure the backend is running on http://localhost:8000');
+                throw new Error('Cannot connect to server. Make sure the backend is running on http://127.0.0.1:8000');
             }
             throw error;
         }

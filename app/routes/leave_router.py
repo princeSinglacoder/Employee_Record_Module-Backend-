@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Request
 from app.schemas.leave import EmployeeLeaveRequest, Leave, UpdateEmployeeLeave
 from app.services.leave_service import LeaveService
+from app.services.employee_service import Employee_Service
 from app.database.leaveDB import LeaveDB
 from app.utils.jwt import get_current_user
 from sqlalchemy.orm import Session
 from app.config import get_db
 import uuid
+from app.websocket.notification_ws import manager
 
 router = APIRouter(prefix="/leave")
 
@@ -75,21 +77,61 @@ def delete_leave(leave_id: str, request: Request, db: Session = Depends(get_db))
     return leave_service.delete(leave_id)
 
 @router.put("/approve/{leave_id}")
-def approve_leave(leave_id: str, request: Request, db: Session = Depends(get_db)):
+async def approve_leave(leave_id: str, request: Request, db: Session = Depends(get_db)):
     current_user = get_current_user(request)
-    leave_service = LeaveService(db)
 
     if current_user["role"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admin can approve leave")
 
-    return leave_service.update_status(leave_id, "approved", current_user["userName"])
+    leave_service = LeaveService(db)
+    
+    # Get employee details for notification
+    leave_obj = leave_service.get(leave_id)
+    emp_service = Employee_Service(db)
+    employee = emp_service.get(leave_obj.userName)
+    
+    result = leave_service.update_status(leave_id, "approved", current_user["userName"])
+
+    # -------- STEP 5: Notify employee after approval --------
+    try:
+        await manager.notify_employee(
+            employee.id,
+            {
+                "type": "LEAVE_APPROVED",
+                "message": "Your leave request has been approved ✅"
+            }
+        )
+    except Exception as e:
+        print(f"Error sending notification: {e}")
+
+    return result
 
 @router.put("/reject/{leave_id}")
-def reject_leave(leave_id: str, request: Request, db: Session = Depends(get_db)):
+async def reject_leave(leave_id: str, request: Request, db: Session = Depends(get_db)):
     current_user = get_current_user(request)
-    leave_service = LeaveService(db)
 
     if current_user["role"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admin can reject leave")
 
-    return leave_service.update_status(leave_id, "rejected", current_user["userName"])
+    leave_service = LeaveService(db)
+    
+    # Get employee details for notification
+    leave_obj = leave_service.get(leave_id)
+    emp_service = Employee_Service(db)
+    employee = emp_service.get(leave_obj.userName)
+    
+    result = leave_service.update_status(leave_id, "rejected", current_user["userName"])
+
+    # -------- STEP 5: Notify employee after rejection --------
+    try:
+        await manager.notify_employee(
+            employee.id,
+            {
+                "type": "LEAVE_REJECTED",
+                "message": "Your leave request has been rejected ❌"
+            }
+        )
+    except Exception as e:
+        print(f"Error sending notification: {e}")
+
+    return result
